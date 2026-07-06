@@ -49,4 +49,46 @@ const loginUser = catchAsync(
     },
 );
 
-export const authController = { registerUser, loginUser };
+const refreshToken = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const refreshToken = req.cookies.refreshToken;
+
+        const { accessToken } =
+            await authService.refreshTokenIntoDB(refreshToken);
+        res.cookie('newAccessToken', accessToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'none',
+            maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year or 365 day
+        });
+
+        sendResponse(res, {
+            success: true,
+            statusCode: HttpStatus.OK,
+            message: 'Token refreshed is done',
+            data: { accessToken },
+        });
+    },
+);
+
+const getMyProfile = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const profile = await authService.getMyProfileIntoDB(
+            req.user?.id as string,
+        );
+
+        sendResponse(res, {
+            success: true,
+            statusCode: HttpStatus.OK,
+            message: 'User profile fetched successfully',
+            data: { profile },
+        });
+    },
+);
+
+export const authController = {
+    registerUser,
+    loginUser,
+    refreshToken,
+    getMyProfile,
+};
