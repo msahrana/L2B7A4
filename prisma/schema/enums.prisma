@@ -12,23 +12,25 @@ enum UserStatus {
 enum PropertyStatus {
   AVAILABLE
   RENTED
+  UNAVAILABLE
 }
 
-enum RentalStatus {
+enum RentalRequestStatus {
   PENDING
   APPROVED
   REJECTED
-  ACTIVE
   COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  STRIPE
+  SSLCOMMERZ
 }
 
 enum PaymentStatus {
   PENDING
   COMPLETED
   FAILED
-}
-
-enum PaymentProvider {
-  STRIPE
-  SSLCOMMERZ
+  REFUNDED
 }
