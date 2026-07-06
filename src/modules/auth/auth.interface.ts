@@ -8,3 +8,8 @@ export interface IRegisterUser {
     role: Role;
     profilePhoto?: string;
 }
+
+export interface ILoginUser {
+    email: string;
+    password: string;
+}
