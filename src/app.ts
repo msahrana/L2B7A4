@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import { authRoute } from './modules/auth/auth.route';
 import { landlordRoute } from './modules/landlord/landlord.route';
 import { categoryRoute } from './modules/category/category.route';
+import { rentalRoute } from './modules/rentals/rental.route';
 
 const app: Application = express();
 
@@ -36,5 +37,6 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/api/auth', authRoute);
 app.use('/api/landlord', landlordRoute);
 app.use('/api/categories', categoryRoute);
+app.use('/api/rentals', rentalRoute);
 
 export default app;
