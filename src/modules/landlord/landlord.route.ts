@@ -10,5 +10,26 @@ router.post(
     auth(Role.LANDLORD),
     landlordController.createProperties,
 );
+router.get(
+    '/properties',
+    auth(Role.LANDLORD),
+    landlordController.getPropertyRequests,
+);
+router.get('/properties/:id', landlordController.getSingleProperty);
+router.put(
+    '/properties/:id',
+    auth(Role.LANDLORD),
+    landlordController.updateProperty,
+);
+router.delete(
+    '/properties/:id',
+    auth(Role.LANDLORD),
+    landlordController.deleteProperty,
+);
+router.get(
+    '/requests',
+    auth(Role.LANDLORD),
+    landlordController.getRentalRequests,
+);
 
 export const landlordRoute = router;

@@ -65,83 +65,126 @@ const createPropertyIntoDB = async (
     return result;
 };
 
-// const getAllProperties = async () => {
-//     return prisma.property.findMany({
-//         include: {
-//             landlord: true,
-//             category: true,
-//         },
-//     });
-// };
+const getAllPropertiesIntoDB = async (landlordId: string) => {
+    return prisma.property.findMany({
+        include: {
+            landlord: true,
+            category: true,
+        },
+    });
+};
 
-// const getSingleProperty = async (id: string) => {
-//     const property = await prisma.property.findUnique({
-//         where: {
-//             id,
-//         },
-//         include: {
-//             landlord: true,
-//             category: true,
-//             reviews: true,
-//         },
-//     });
+const getAllRentalRequestsFromDB = async (landlordId: string) => {
+    const landlord = await prisma.user.findUnique({
+        where: {
+            id: landlordId,
+        },
+    });
 
-//     if (!property) {
-//         throw new Error('Property not found.');
-//     }
+    if (!landlord) {
+        throw new Error('Landlord not found.');
+    }
 
-//     return property;
-// };
+    const requests = await prisma.rentalRequest.findMany({
+        where: {
+            property: {
+                landlordId,
+            },
+        },
+        include: {
+            tenant: {
+                include: {
+                    profile: true,
+                },
+            },
+            property: {
+                include: {
+                    category: true,
+                },
+            },
+            payment: true,
+        },
+        orderBy: {
+            createdAt: 'desc',
+        },
+    });
 
-// const updateProperty = async (id: string, payload: any, landlordId: string) => {
-//     const property = await prisma.property.findUnique({
-//         where: {
-//             id,
-//         },
-//     });
+    return requests;
+};
 
-//     if (!property) {
-//         throw new Error('Property not found.');
-//     }
+const getSinglePropertyIntoDB = async (id: string) => {
+    const property = await prisma.property.findUnique({
+        where: {
+            id,
+        },
+        include: {
+            landlord: true,
+            category: true,
+            reviews: true,
+        },
+    });
 
-//     if (property.landlordId !== landlordId) {
-//         throw new Error('Unauthorized');
-//     }
+    if (!property) {
+        throw new Error('Property not found.');
+    }
 
-//     return prisma.property.update({
-//         where: {
-//             id,
-//         },
-//         data: payload,
-//     });
-// };
+    return property;
+};
 
-// const deleteProperty = async (id: string, landlordId: string) => {
-//     const property = await prisma.property.findUnique({
-//         where: {
-//             id,
-//         },
-//     });
+const updatePropertyIntoDB = async (
+    id: string,
+    payload: any,
+    landlordId: string,
+) => {
+    const property = await prisma.property.findUnique({
+        where: {
+            id,
+        },
+    });
 
-//     if (!property) {
-//         throw new Error('Property not found.');
-//     }
+    if (!property) {
+        throw new Error('Property not found.');
+    }
 
-//     if (property.landlordId !== landlordId) {
-//         throw new Error('Unauthorized');
-//     }
+    if (property.landlordId !== landlordId) {
+        throw new Error('Unauthorized');
+    }
 
-//     return prisma.property.delete({
-//         where: {
-//             id,
-//         },
-//     });
-// };
+    return prisma.property.update({
+        where: {
+            id,
+        },
+        data: payload,
+    });
+};
+
+const deletePropertyIntoDB = async (id: string, landlordId: string) => {
+    const property = await prisma.property.findUnique({
+        where: {
+            id,
+        },
+    });
+
+    if (!property) {
+        throw new Error('Property not found.');
+    }
+
+    if (property.landlordId !== landlordId) {
+        throw new Error('Unauthorized');
+    }
+
+    return prisma.property.delete({
+        where: {
+            id,
+        },
+    });
+};
 
 export const landlordService = {
     createPropertyIntoDB,
-    // getAllProperties,
-    // getSingleProperty,
-    // updateProperty,
-    // deleteProperty,
+    getAllPropertiesIntoDB,
+    getAllRentalRequestsFromDB,
+    getSinglePropertyIntoDB,
+    updatePropertyIntoDB,
+    deletePropertyIntoDB,
 };

@@ -22,4 +22,82 @@ const createProperties = catchAsync(
     },
 );
 
-export const landlordController = { createProperties };
+const getPropertyRequests = catchAsync(async (req: Request, res: Response) => {
+    const landlordId = req.user!.id;
+
+    const result = await landlordService.getAllPropertiesIntoDB(landlordId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: HttpStatus.OK,
+        message: 'Properties requests retrieved successfully.',
+        data: result,
+    });
+});
+
+const getRentalRequests = catchAsync(async (req: Request, res: Response) => {
+    const landlordId = req.user!.id;
+
+    const result = await landlordService.getAllRentalRequestsFromDB(landlordId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: HttpStatus.OK,
+        message: 'Rental requests retrieved successfully.',
+        data: result,
+    });
+});
+
+const getSingleProperty = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const result = await landlordService.getSinglePropertyIntoDB(id as string);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: HttpStatus.OK,
+        message: 'Single Property retrieved successfully.',
+        data: result,
+    });
+});
+
+const updateProperty = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const landlordId = req.user?.id;
+
+    const result = await landlordService.updatePropertyIntoDB(
+        id as string,
+        req.body,
+        landlordId as string,
+    );
+
+    sendResponse(res, {
+        success: true,
+        statusCode: HttpStatus.OK,
+        message: 'Property updated successfully.',
+        data: result,
+    });
+});
+
+const deleteProperty = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const landlordId = req.user!.id;
+
+    await landlordService.deletePropertyIntoDB(id as string, landlordId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: HttpStatus.OK,
+        message: 'Property deleted successfully.',
+        data: null,
+    });
+});
+
+export const landlordController = {
+    createProperties,
+    getPropertyRequests,
+    getRentalRequests,
+    getSingleProperty,
+    updateProperty,
+    deleteProperty,
+};
