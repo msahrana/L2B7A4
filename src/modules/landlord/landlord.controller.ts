@@ -93,6 +93,26 @@ const deleteProperty = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const updateRentalRequestStatus = catchAsync(
+    async (req: Request, res: Response) => {
+        const landlordId = req.user?.id as string;
+        const rentalId = req.params.id as string;
+
+        const result = await landlordService.updateRentalRequestStatusIntoDB(
+             rentalId,
+            landlordId,
+            req.body
+        );
+
+        sendResponse(res, {
+            success: true,
+            statusCode: HttpStatus.OK,
+            message: 'Rental request updated successfully by APPROVED.',
+            data: result,
+        });
+    },
+);
+
 export const landlordController = {
     createProperties,
     getPropertyRequests,
@@ -100,4 +120,5 @@ export const landlordController = {
     getSingleProperty,
     updateProperty,
     deleteProperty,
+    updateRentalRequestStatus,
 };

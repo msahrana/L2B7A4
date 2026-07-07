@@ -1,3 +1,4 @@
+import { RentalRequestStatus } from '../../../generated/prisma/enums';
 import { prisma } from '../../lib/prisma';
 import { ICreateRental } from './rental.interface';
 
@@ -20,6 +21,7 @@ const createRentalIntoDB = async (payload: ICreateRental, tenantId: string) => {
         where: {
             tenantId,
             propertyId: payload.propertyId,
+            status: RentalRequestStatus.PENDING,
         },
     });
 

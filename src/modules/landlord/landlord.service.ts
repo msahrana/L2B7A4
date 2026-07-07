@@ -1,4 +1,4 @@
-import { Role } from '../../../generated/prisma/enums';
+import { RentalRequestStatus, Role } from '../../../generated/prisma/enums';
 import { prisma } from '../../lib/prisma';
 import { ICreateProperty } from './landlord.interface';
 
@@ -180,6 +180,58 @@ const deletePropertyIntoDB = async (id: string, landlordId: string) => {
     });
 };
 
+const updateRentalRequestStatusIntoDB = async (
+    rentalId: string,
+    landlordId: string,
+    payload: { status: RentalRequestStatus },
+) => {
+    const rental = await prisma.rentalRequest.findUnique({
+        where: {
+            id: rentalId,
+        },
+        include: {
+            property: true,
+        },
+    });
+
+    if (!rental) {
+        throw new Error('Rental request not found.');
+    }
+
+    // Check property owner
+    if (rental.property.landlordId !== landlordId) {
+        throw new Error('Unauthorized.');
+    }
+
+    // Already processed
+    if (rental.status !== RentalRequestStatus.PENDING) {
+        throw new Error('Rental request has already been processed.');
+    }
+
+    // Only APPROVED or REJECTED
+    if (
+        payload.status !== RentalRequestStatus.APPROVED &&
+        payload.status !== RentalRequestStatus.REJECTED
+    ) {
+        throw new Error('Invalid rental status.');
+    }
+
+    const result = await prisma.rentalRequest.update({
+        where: {
+            id: rentalId,
+        },
+        data: {
+            status: payload.status,
+        },
+        include: {
+            tenant: true,
+            property: true,
+        },
+    });
+
+    return result;
+};
+
 export const landlordService = {
     createPropertyIntoDB,
     getAllPropertiesIntoDB,
@@ -187,4 +239,5 @@ export const landlordService = {
     getSinglePropertyIntoDB,
     updatePropertyIntoDB,
     deletePropertyIntoDB,
+    updateRentalRequestStatusIntoDB,
 };

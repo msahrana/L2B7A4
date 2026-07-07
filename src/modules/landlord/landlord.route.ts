@@ -31,5 +31,10 @@ router.get(
     auth(Role.LANDLORD),
     landlordController.getRentalRequests,
 );
+router.patch(
+    '/requests/:id',
+    auth(Role.LANDLORD),
+    landlordController.updateRentalRequestStatus,
+);
 
 export const landlordRoute = router;
