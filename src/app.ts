@@ -10,6 +10,7 @@ import { reviewRoute } from './modules/reviews/review.route';
 import { propertyRoute } from './modules/properties/property.route';
 import { adminRoute } from './modules/admin/admin.route';
 import { paymentRoute } from './modules/payments/payment.route';
+import { notFound } from './middleware/notFound';
 
 const app: Application = express();
 
@@ -46,5 +47,7 @@ app.use('/api/reviews', reviewRoute);
 app.use('/api/properties', propertyRoute);
 app.use('/api/admin', adminRoute);
 app.use('/api/payments', paymentRoute);
+
+app.use(notFound);
 
 export default app;
