@@ -1,31 +1,31 @@
 model Payment {
-  id                String @id @default(uuid())
+  id String @id @default(uuid())
 
-  rentalRequestId   String @unique
+  rentalRequestId String @unique
 
-  transactionId     String @unique
+  rentalRequest   RentalRequest @relation(fields: [rentalRequestId], references: [id], onDelete: Cascade)
 
-  amount            Float
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  method            PaymentMethod
+  transactionId String @unique
 
-  provider          String
+  amount Float
 
-  status            PaymentStatus @default(PENDING)
+  method PaymentMethod
 
-  paidAt            DateTime?
+  provider String
 
-  stripeCustomerId String @unique
+  status PaymentStatus @default(PENDING)
 
-  stripeSubscriptionId String @unique
+  paidAt DateTime?
 
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  stripeCustomerId String
+  
+  currentPeriodEnd DateTime?
 
-  rentalRequest     RentalRequest @relation(fields: [rentalRequestId], references: [id], onDelete: Cascade)
-
-  userId            String @unique
-  user              User @relation(fields: [userId], references:[id], onDelete : Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("Payments")
 }

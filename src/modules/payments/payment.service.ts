@@ -1,6 +1,9 @@
 import { prisma } from '../../lib/prisma';
 import { stripe } from '../../lib/stripe';
 import config from '../../config';
+import Stripe from 'stripe';
+import { PaymentMethod, PaymentStatus } from '../../../generated/prisma/enums';
+// import { PaymentMethod, PaymentStatus } from "../../../generated/prisma";
 
 const createCheckoutSessionIntoDB = async (rentalRequestId: string) => {
     const rentalRequest = await prisma.rentalRequest.findUniqueOrThrow({
@@ -73,6 +76,58 @@ const handleWebhookIntoDB = async (payload: Buffer, signature: string) => {
     // Handle the event
     switch (event.type) {
         case 'checkout.session.completed':
+            console.log(event.data.object);
+            const session: Stripe.Checkout.Session = event.data.object;
+            const userId = session.metadata?.userId;
+            const rentalRequestId = session.metadata?.rentalRequestId;
+            const stripeCustomerId = session.customer as string;
+
+            const paymentIntentId = session.payment_intent as string;
+
+            if (
+                !userId ||
+                !rentalRequestId ||
+                !paymentIntentId ||
+                !stripeCustomerId
+            ) {
+                console.log(
+                    'Webhook : Missing values For Creating Checkout Session',
+                );
+                return;
+            }
+
+            const paymentIntent =
+                await stripe.paymentIntents.retrieve(paymentIntentId);
+            console.log(paymentIntent);
+
+            await prisma.payment.upsert({
+                where: {
+                    rentalRequestId,
+                },
+                update: {
+                    transactionId: paymentIntent.id,
+                    amount: paymentIntent.amount_received / 100,
+                    method: PaymentMethod.STRIPE,
+                    provider: 'STRIPE',
+                    status: PaymentStatus.COMPLETED,
+                    paidAt: new Date(),
+                    stripeCustomerId,
+                    currentPeriodEnd: new Date(),
+                },
+                create: {
+                    rentalRequestId,
+                    userId,
+                    transactionId: paymentIntent.id,
+                    amount: paymentIntent.amount_received / 100,
+                    method: PaymentMethod.STRIPE,
+                    provider: 'STRIPE',
+                    status: PaymentStatus.COMPLETED,
+                    paidAt: new Date(),
+                    stripeCustomerId,
+                    currentPeriodEnd: new Date(),
+                },
+            });
+
             break;
 
         case 'customer.subscription.updated':
