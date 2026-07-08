@@ -11,6 +11,7 @@ import { propertyRoute } from './modules/properties/property.route';
 import { adminRoute } from './modules/admin/admin.route';
 import { paymentRoute } from './modules/payments/payment.route';
 import { notFound } from './middleware/notFound';
+import { globalErrorHandler } from './middleware/globalErrorHandler';
 
 const app: Application = express();
 
@@ -49,5 +50,6 @@ app.use('/api/admin', adminRoute);
 app.use('/api/payments', paymentRoute);
 
 app.use(notFound);
+app.use(globalErrorHandler);
 
 export default app;
