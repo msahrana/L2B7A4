@@ -12,6 +12,7 @@ import { adminRoute } from './modules/admin/admin.route';
 import { paymentRoute } from './modules/payments/payment.route';
 import { notFound } from './middleware/notFound';
 import { globalErrorHandler } from './middleware/globalErrorHandler';
+import { stripe } from './lib/stripe';
 
 const app: Application = express();
 
@@ -20,6 +21,57 @@ app.use(
         origin: config.APP_URL,
         credentials: true,
     }),
+);
+
+const endpointSecret = config.STRIPE_WEBHOOK_SECRET;
+
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
+
+app.post(
+    '/api/payments/webhook',
+    express.raw({ type: 'application/json' }),
+    (request, response) => {
+        let event = request.body;
+        console.log(event, 'stripe request body');
+        console.log(request.headers, 'stripe request headers');
+
+        if (endpointSecret) {
+            const signature = request.headers['stripe-signature']!;
+            try {
+                event = stripe.webhooks.constructEvent(
+                    request.body,
+                    signature,
+                    endpointSecret,
+                );
+            } catch (err: any) {
+                console.log(
+                    `⚠️ Webhook signature verification failed.`,
+                    err.message,
+                );
+                return response.status(400).json({
+                    message: err.message,
+                });
+            }
+
+            console.log(event, 'after try block');
+
+            switch (event.type) {
+                case 'payment_intent.succeeded':
+                    const paymentIntent = event.data.object;
+
+                    break;
+                case 'payment_method.attached':
+                    const paymentMethod = event.data.object;
+
+                    break;
+
+                default:
+                    console.log(`Unhandled event type ${event.type}`);
+            }
+
+            response.json({ received: true });
+        }
+    },
 );
 
 app.use(express.json());

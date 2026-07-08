@@ -6,11 +6,11 @@ import { prisma } from '../lib/prisma';
 export const subscriptionGuard = () => {
     return catchAsync(
         async (req: Request, res: Response, next: NextFunction) => {
-            const userId = req.user?.id;
+            const rentalRequestId = req.user?.id;
 
             const payment = await prisma.payment.findUnique({
                 where: {
-                    id: userId,
+                    id: rentalRequestId,
                 },
             });
 

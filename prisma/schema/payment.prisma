@@ -15,10 +15,17 @@ model Payment {
 
   paidAt            DateTime?
 
+  stripeCustomerId String @unique
+
+  stripeSubscriptionId String @unique
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
   rentalRequest     RentalRequest @relation(fields: [rentalRequestId], references: [id], onDelete: Cascade)
+
+  userId            String @unique
+  user              User @relation(fields: [userId], references:[id], onDelete : Cascade)
 
   @@map("Payments")
 }
