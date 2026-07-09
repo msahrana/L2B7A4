@@ -13,5 +13,10 @@ router.get(
     auth(Role.TENANT, Role.LANDLORD, Role.ADMIN),
     authController.getMyProfile,
 );
+router.put(
+    '/my-profile',
+    auth(Role.TENANT, Role.LANDLORD, Role.ADMIN),
+    authController.updateMyProfile,
+);
 
 export const authRoute = router;
