@@ -49,3 +49,30 @@ RentNest provides a complete backend solution for a modern rental property marke
 
 ## ERD Relation: 
 https://drawsql.app/teams/md-sayed/diagrams/rentnest
+
+## ERD Design: 
+# 📸 Project Screenshots
+
+## ERD Diagram
+
+<p align="center">
+  <img src="./assets/images/erd.png" alt="ERD Diagram" width="900">
+</p>
+
+## Swagger API Documentation
+
+<p align="center">
+  <img src="./assets/images/swagger.png" alt="Swagger API" width="900">
+</p>
+
+## Login Response
+
+<p align="center">
+  <img src="./assets/images/login.png" alt="Login API Response" width="900">
+</p>
+
+## Postman Collection
+
+<p align="center">
+  <img src="./assets/images/postman.png" alt="Postman Collection" width="900">
+</p>
