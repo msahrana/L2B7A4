@@ -2,8 +2,7 @@ import { prisma } from '../../lib/prisma';
 import { stripe } from '../../lib/stripe';
 import config from '../../config';
 import Stripe from 'stripe';
-import { PaymentMethod, PaymentStatus } from '../../../generated/prisma/enums';
-// import { PaymentMethod, PaymentStatus } from "../../../generated/prisma";
+import { PaymentMethod, PaymentStatus, Role } from '../../../generated/prisma/enums';
 
 const createCheckoutSessionIntoDB = async (rentalRequestId: string) => {
     const rentalRequest = await prisma.rentalRequest.findUniqueOrThrow({
@@ -142,7 +141,76 @@ const handleWebhookIntoDB = async (payload: Buffer, signature: string) => {
     }
 };
 
+const getMyPaymentHistoryIntoDB = async (userId: string) => {
+    const payments = await prisma.payment.findMany({
+        where: {
+            userId,
+        },
+        include: {
+            rentalRequest: {
+                include: {
+                    property: {
+                        select: {
+                            id: true,
+                            title: true,
+                            location: true,
+                            rent: true,
+                        },
+                    },
+                },
+            },
+        },
+        orderBy: {
+            createdAt: 'desc',
+        },
+    });
+    return payments;
+};
+
+const getSinglePaymentDataIntoDB = async (
+    paymentId: string,
+    userId: string,
+    role: Role,
+) => {
+    const payment = await prisma.payment.findUniqueOrThrow({
+        where: {
+            id: paymentId,
+        },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                },
+            },
+            rentalRequest: {
+                include: {
+                    property: {
+                        select: {
+                            id: true,
+                            title: true,
+                            location: true,
+                            rent: true,
+                            bedrooms: true,
+                            bathrooms: true,
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    if (role !== Role.ADMIN && payment.userId !== userId) {
+        throw new Error('You are not authorized to view this payment.');
+    }
+
+    return payment;
+};
+
 export const paymentService = {
     createCheckoutSessionIntoDB,
     handleWebhookIntoDB,
+    getMyPaymentHistoryIntoDB,
+    getSinglePaymentDataIntoDB,
 };
