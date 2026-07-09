@@ -52,5 +52,5 @@ https://drawsql.app/teams/md-sayed/diagrams/rentnest
 
 ## ERD Design: 
 <p align="center">
-  <img src="./assets/images/RentNest.png" width="100%" alt="Postman">
+  <img src="./assets/images/RentNest.png" alt="ERD Diagram" width="900">
 </p>
