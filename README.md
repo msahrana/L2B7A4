@@ -50,7 +50,7 @@ RentNest provides a complete backend solution for a modern rental property marke
 ## ERD Relation: 
 https://drawsql.app/teams/md-sayed/diagrams/rentnest
 
-## ERD Design: 
+## ERD Design Screenshot: 
 <p align="center">
-  <img src="./assets/images/RentNest.png" alt="ERD Diagram" width="900">
+  <img src="./assets/images/RentNest.png" alt="ERD Diagram" width="100%">
 </p>
