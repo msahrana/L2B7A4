@@ -1,4 +1,4 @@
-## Project name: RentNest
+## Project Name: RentNest
 
 ## Introduction: 
 RentNest is a modern and secure rental property management platform that simplifies the process of renting properties for tenants, landlords, and administrators. It provides a centralized system where landlords can list and manage rental properties, tenants can search for suitable homes, submit rental requests, complete online payments, and leave reviews after their rental experience. Administrators oversee the platform by managing users, property listings, rental requests, and property categories.
@@ -44,5 +44,8 @@ RentNest offers several practical benefits for all users of the platform:
 6. Easy integration with frontend web and mobile applications.
 7. Online payment integration using Stripe.
 
-## Conclusion: ## 
+## Conclusion: 
 RentNest provides a complete backend solution for a modern rental property marketplace. By digitizing property management, rental requests, payments, and reviews, it improves the overall rental experience for tenants and landlords while giving administrators full control over the platform. Its secure architecture, clean code structure, and scalable design make it suitable for both academic projects and real-world rental management applications.
+
+## ERD Relation: 
+https://drawsql.app/teams/md-sayed/diagrams/rentnest
