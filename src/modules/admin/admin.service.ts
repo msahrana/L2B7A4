@@ -130,7 +130,13 @@ const getDashboardStatsFromDB = async (): Promise<IDashboardStats> => {
         revenue,
 
         totalReviews,
+
+        recentPayments,
+        recentRentalRequests,
+        topLandlords,
+        topProperties,
     ] = await Promise.all([
+        // ================= Users =================
         prisma.user.count(),
 
         prisma.user.count({
@@ -163,6 +169,7 @@ const getDashboardStatsFromDB = async (): Promise<IDashboardStats> => {
             },
         }),
 
+        // ================= Properties =================
         prisma.property.count(),
 
         prisma.property.count({
@@ -183,6 +190,7 @@ const getDashboardStatsFromDB = async (): Promise<IDashboardStats> => {
             },
         }),
 
+        // ================= Rental Requests =================
         prisma.rentalRequest.count(),
 
         prisma.rentalRequest.count({
@@ -215,6 +223,7 @@ const getDashboardStatsFromDB = async (): Promise<IDashboardStats> => {
             },
         }),
 
+        // ================= Payments =================
         prisma.payment.count(),
 
         prisma.payment.count({
@@ -250,47 +259,208 @@ const getDashboardStatsFromDB = async (): Promise<IDashboardStats> => {
             },
         }),
 
+        // ================= Reviews =================
         prisma.review.count(),
+
+        // ================= Recent Payments =================
+        // ================= Recent Payments =================
+
+        prisma.payment.findMany({
+            take: 5,
+            orderBy: {
+                createdAt: 'desc',
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                    },
+                },
+                rentalRequest: {
+                    include: {
+                        property: {
+                            select: {
+                                id: true,
+                                title: true,
+                                location: true,
+                                rent: true,
+                            },
+                        },
+                    },
+                },
+            },
+        }),
+
+        // ================= Recent Rental Requests =================
+
+        prisma.rentalRequest.findMany({
+            take: 5,
+            orderBy: {
+                createdAt: 'desc',
+            },
+            include: {
+                tenant: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                    },
+                },
+                property: {
+                    select: {
+                        id: true,
+                        title: true,
+                        rent: true,
+                        location: true,
+                    },
+                },
+            },
+        }),
+
+        // ================= Top Landlords =================
+
+        prisma.user.findMany({
+            where: {
+                role: Role.LANDLORD,
+            },
+
+            take: 5,
+
+            orderBy: {
+                properties: {
+                    _count: 'desc',
+                },
+            },
+
+            select: {
+                id: true,
+                name: true,
+                email: true,
+
+                _count: {
+                    select: {
+                        properties: true,
+                    },
+                },
+            },
+        }),
+
+        // ================= Top Reviewed Properties =================
+
+        prisma.property.findMany({
+            take: 5,
+
+            orderBy: {
+                reviews: {
+                    _count: 'desc',
+                },
+            },
+
+            select: {
+                id: true,
+                title: true,
+                location: true,
+                rent: true,
+                thumbnail: true,
+
+                _count: {
+                    select: {
+                        reviews: true,
+                    },
+                },
+            },
+        }),
     ]);
 
     return {
-        users: {
-            total: totalUsers,
-            tenants,
-            landlords,
-            admins,
-            active: activeUsers,
-            banned: bannedUsers,
+        overview: {
+            users: {
+                total: totalUsers,
+                tenants,
+                landlords,
+                admins,
+                active: activeUsers,
+                banned: bannedUsers,
+            },
+
+            properties: {
+                total: totalProperties,
+                available: availableProperties,
+                rented: rentedProperties,
+                unavailable: unavailableProperties,
+            },
+
+            rentalRequests: {
+                total: totalRequests,
+                pending: pendingRequests,
+                approved: approvedRequests,
+                rejected: rejectedRequests,
+                completed: completedRequests,
+                cancelled: cancelledRequests,
+            },
+
+            payments: {
+                total: totalPayments,
+                pending: pendingPayments,
+                completed: completedPayments,
+                failed: failedPayments,
+                refunded: refundedPayments,
+                totalRevenue: revenue._sum.amount ?? 0,
+            },
+
+            reviews: {
+                total: totalReviews,
+            },
         },
 
-        properties: {
-            total: totalProperties,
-            available: availableProperties,
-            rented: rentedProperties,
-            unavailable: unavailableProperties,
-        },
+        recentPayments: recentPayments.map((payment) => ({
+            id: payment.id,
+            transactionId: payment.transactionId,
+            amount: payment.amount,
+            method: payment.method,
+            provider: payment.provider,
+            status: payment.status,
+            paidAt: payment.paidAt,
+            createdAt: payment.createdAt,
 
-        rentalRequests: {
-            total: totalRequests,
-            pending: pendingRequests,
-            approved: approvedRequests,
-            rejected: rejectedRequests,
-            completed: completedRequests,
-            cancelled: cancelledRequests,
-        },
+            user: {
+                id: payment.user.id,
+                name: payment.user.name,
+                email: payment.user.email,
+            },
 
-        payments: {
-            total: totalPayments,
-            pending: pendingPayments,
-            completed: completedPayments,
-            failed: failedPayments,
-            refunded: refundedPayments,
-            totalRevenue: revenue._sum.amount ?? 0,
-        },
+            property: payment.rentalRequest.property,
+        })),
 
-        reviews: {
-            total: totalReviews,
-        },
+        recentRentalRequests: recentRentalRequests.map((request) => ({
+            id: request.id,
+            moveInDate: request.moveInDate,
+            status: request.status,
+            createdAt: request.createdAt,
+            message: request.message,
+
+            tenant: request.tenant,
+
+            property: request.property,
+        })),
+
+        topLandlords: topLandlords.map((landlord) => ({
+            id: landlord.id,
+            name: landlord.name,
+            email: landlord.email,
+            totalProperties: landlord._count.properties,
+        })),
+
+        topProperties: topProperties.map((property) => ({
+            id: property.id,
+            title: property.title,
+            location: property.location,
+            rent: property.rent,
+            thumbnail: property.thumbnail,
+            totalReviews: property._count.reviews,
+        })),
     };
 };
 
