@@ -13,4 +13,10 @@ router.get('/properties', auth(Role.ADMIN), adminController.getAllProperties);
 
 router.get('/rentals', auth(Role.ADMIN), adminController.getAllRentals);
 
+router.get(
+    '/dashboard',
+    auth(Role.ADMIN),
+    adminController.getDashboardStats,
+);
+
 export const adminRoute = router;
