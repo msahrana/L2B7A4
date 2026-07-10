@@ -1,3 +1,5 @@
+import { IDashboardStats } from './admin.interface';
+import { prisma } from '../../lib/prisma';
 import {
     PaymentStatus,
     PropertyStatus,
@@ -5,8 +7,6 @@ import {
     Role,
     UserStatus,
 } from '../../../generated/prisma/enums';
-import { prisma } from '../../lib/prisma';
-import { IDashboardStats } from './admin.interface';
 
 const getAllUsersFromDB = async () => {
     return prisma.user.findMany({
