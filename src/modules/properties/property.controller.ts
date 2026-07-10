@@ -28,7 +28,25 @@ const getSingleProperty = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const getPropertyReviews = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const result = await propertyService.getPropertyReviewsFromDB(
+        id as string,
+        req.query,
+    );
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: 'Property reviews retrieved successfully.',
+        meta: result.meta,
+        data: result.data,
+    });
+});
+
 export const propertyController = {
     getAllProperties,
     getSingleProperty,
+    getPropertyReviews,
 };
