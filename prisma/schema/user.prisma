@@ -19,5 +19,7 @@ model User {
   rentalRequests   RentalRequest[]
   reviews          Review[]
 
+  passwordChangedAt DateTime?
+
   @@map("Users")
 }

@@ -1,7 +1,7 @@
-import { Router } from 'express';
+import { Role } from '../../../generated/prisma/enums';
 import { authController } from './auth.controller';
 import { auth } from '../../middleware/auth';
-import { Role } from '../../../generated/prisma/enums';
+import { Router } from 'express';
 
 const router = Router();
 
@@ -17,6 +17,11 @@ router.put(
     '/my-profile',
     auth(Role.TENANT, Role.LANDLORD, Role.ADMIN),
     authController.updateMyProfile,
+);
+router.post(
+    '/change-password',
+    auth(Role.TENANT, Role.LANDLORD, Role.ADMIN),
+    authController.changePassword,
 );
 
 export const authRoute = router;

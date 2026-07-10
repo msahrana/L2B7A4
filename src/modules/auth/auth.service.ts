@@ -1,10 +1,10 @@
-import bcrypt from 'bcryptjs';
+import { IChangePassword, ILoginUser, IRegisterUser } from './auth.interface';
 import { Role } from '../../../generated/prisma/enums';
-import { prisma } from '../../lib/prisma';
-import { ILoginUser, IRegisterUser } from './auth.interface';
-import config from '../../config';
-import { jwtUtils } from '../../utils/jwt';
 import { JwtPayload, SignOptions } from 'jsonwebtoken';
+import { prisma } from '../../lib/prisma';
+import { jwtUtils } from '../../utils/jwt';
+import config from '../../config';
+import bcrypt from 'bcryptjs';
 
 const registerUserIntoDB = async (payload: IRegisterUser) => {
     const { name, email, password, profilePhoto, role } = payload;
@@ -190,10 +190,79 @@ const updateMyProfileIntoDB = async (userId: string, payload: any) => {
     return updateUser;
 };
 
+const changePasswordIntoDB = async (
+    userId: string,
+    payload: IChangePassword,
+) => {
+    const { oldPassword, newPassword } = payload;
+
+    const user = await prisma.user.findUniqueOrThrow({
+        where: {
+            id: userId,
+        },
+    });
+
+    // Verify old password
+    const isOldPasswordMatched = await bcrypt.compare(
+        oldPassword,
+        user.password,
+    );
+
+    if (!isOldPasswordMatched) {
+        throw new Error('Old password is incorrect.');
+    }
+
+    // Password length validation
+    if (newPassword.length < 8) {
+        throw new Error('Password must be at least 8 characters long.');
+    }
+
+    // Prevent using previous password again
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+
+    if (isSamePassword) {
+        throw new Error(
+            'New password must be different from the current password.',
+        );
+    }
+
+    const hashedPassword = await bcrypt.hash(
+        newPassword,
+        Number(config.BCRYPT_SALT_ROUNDS),
+    );
+
+    const updatedUser = await prisma.user.update({
+        where: {
+            id: userId,
+        },
+
+        data: {
+            password: hashedPassword,
+            passwordChangedAt: new Date(),
+        },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            status: true,
+            updatedAt: true,
+            profile: {
+                select: {
+                    profilePhoto: true,
+                },
+            },
+        },
+    });
+
+    return updatedUser;
+};
+
 export const authService = {
     registerUserIntoDB,
     loginUserIntoDB,
     refreshTokenIntoDB,
     getMyProfileIntoDB,
     updateMyProfileIntoDB,
+    changePasswordIntoDB,
 };
